@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI对话聚合对比</title>
+    <script src="https://unpkg.com/vue@2.7.16/dist/vue.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* 核心：body 占满全屏，且禁止出现整个页面的滚动条 */
+        body, #app {
+            font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+            background-color: #f5f5f5;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* 防止整个页面滚动 */
+        }
+
+        /* --- 顶部区域：固定高度 --- */
+        .selection-panel {
+            background-color: #fff;
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0; /* 关键：防止被压缩 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+        
+        .selection-title {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .model-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 13px;
+            user-select: none;
+        }
+        
+        .model-checkbox:hover {
+            background-color: #f0f7ff;
+            border-color: #b3d7ff;
+        }
+        
+        .model-checkbox input[type="checkbox"] {
+            cursor: pointer;
+            accent-color: #007bff;
+        }
+
+        /* --- 中间区域：Iframe 占据剩余空间 --- */
+        .main-container {
+            flex: 1; /* 关键：占据剩余的所有高度 */
+            display: flex;
+            width: 100%;
+            padding: 10px;
+            gap: 10px;
+            overflow: hidden; /* 内部滚动，不撑大父容器 */
+            min-height: 0; /* Flexbox 嵌套布局的关键，防止内容溢出 */
+            background-color: #f0f2f5;
+        }
+        
+        .iframe-container {
+            flex: 1; /* 平分宽度 */
+            display: flex;
+            flex-direction: column;
+            min-width: 300px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            /* 确保 flex item 能够正确收缩 */
+            min-height: 0; 
+        }
+        
+        .iframe-title {
+            text-align: center;
+            padding: 5px;
+            background-color: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .iframe-title a, .iframe-title a:hover, .iframe-title a:visited {
+            color: inherit;
+            text-decoration: none;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%; /* 关键：填充父容器的高度 */
+            border: none;
+            background-color: #fff;
+        }
+
+        /* --- 底部区域：输入框 --- */
+        .control-panel {
+            background-color: #fff;
+            padding: 10px 15px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            flex-shrink: 0; /* 关键：防止被压缩 */
+            z-index: 10;
+        }
+        
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding-bottom: 20px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 70px; /* 初始高度 */
+            max-height: 150px;
+            padding: 10px;
+            border: 0;
+            font-size: 14px;
+            resize: none; /* 禁止手动拖拽，防止破坏布局 */
+            outline: none;
+            font-family: inherit;
+        }
+
+        .input-wrapper:has(textarea:focus) {
+            border-color: #007bff;
+        }
+
+        .hint-text {
+            font-size: 12px;
+            color: #999;
+            text-align: right;
+            position: absolute;
+            right: 4px;
+            bottom: 2px;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: auto;
+            margin-bottom: auto;
+        }
+
+        button {
+            display: block;
+            padding: 0 20px;
+            height: 40px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+        
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        button.btn-secondary {
+            background-color: #6c757d;
+        }
+        
+        button.btn-secondary:hover:not(:disabled) {
+            background-color: #545b62;
+        }
+        
+        /* --- 响应式设计 --- */
+        @media (max-width: 768px) {
+            body {
+                /* 在移动端允许 body 滚动，因为 100vh 在移动端包含地址栏可能导致显示不全 */
+                height: auto;
+                min-height: 100vh;
+                overflow-y: auto;
+            }
+
+            .main-container {
+                /* 移动端改为纵向排列 */
+                flex-direction: column;
+                height: auto; /* 让高度自适应内容 */
+                min-height: 50vh; /* 保证至少有显示区域 */
+            }
+
+            .iframe-container {
+                min-height: 400px;
+                flex: none; /* 不再平分宽度，而是堆叠 */
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部：模型选择 -->
+        <div class="selection-panel">
+            <span class="selection-title">选择AI模型（1-4个）：</span>
+            <div class="checkbox-group">
+                <label 
+                    v-for="provider in allProviders" 
+                    :key="provider.id" 
+                    class="model-checkbox"
+                >
+                    <input 
+                        type="checkbox" 
+                        :value="provider.id" 
+                        :checked="provider.selected"
+                        @click="toggleProviderSelection"
+                    >
+                    <span>{{ provider.name }}</span>
+                </label>
+            </div>
+        </div>
+        
+        <!-- 中间：Ifame 区域 (flex: 1 自动占满剩余空间) -->
+        <div class="main-container">
+            <div 
+                v-for="provider in allProviders" 
+                v-if="provider.selected"
+                :key="provider.id" 
+                class="iframe-container"
+            >
+                <div class="iframe-title">
+                    <a :href="provider.url" target="_blank">{{ provider.name }}</a>
+                </div>
+                <iframe 
+                    :ref="'iframe-' + provider.id"
+                    :src="provider.url" 
+                    :title="provider.name"
+                    allow="clipboard-write; clipboard-read"
+                ></iframe>
+            </div>
+        </div>
+        
+        <!-- 底部：控制面板 -->
+        <div class="control-panel">
+            <div class="input-wrapper">
+                <textarea 
+                    v-model="messageInput"
+                    placeholder="输入消息内容... (Ctrl + Enter 发送)"
+                    @keydown.ctrl.enter.exact="sendMessage"
+                ></textarea>
+                <div class="hint-text">按 Ctrl + Enter 快速发送</div>
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" @click="startNewChat">新会话</button>
+                <button 
+                    @click="sendMessage" 
+                    :disabled="!messageInput.trim()"
+                >
+                    发送消息
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    STORAGE_KEY: 'selected_ai_models_v4_simple',
+                    messageInput: '',
+                    // AI模型配置
+                    allProviders: [
+                        { id: 'deepseek', name: 'DeepSeek', url: 'https://chat.deepseek.com', selected: false },
+                        { id: 'chatglm', name: '智谱清言', url: 'https://chat.z.ai', selected: false },
+                        { id: 'qwen', name: '通义千问', url: 'https://chat.qwen.ai', selected: false },
+                        { id: 'kimi', name: 'Kimi', url: 'https://kimi.moonshot.cn', selected: false },
+                        { id: 'doubao', name: '豆包', url: 'https://www.doubao.com', selected: false },
+                        { id: 'yiyan', name: '文心一言', url: 'https://yiyan.baidu.com', selected: false },
+                        { id: 'spark', name: '讯飞星火', url: 'https://xinghuo.xfyun.cn/desk', selected: false },
+                        { id: 'baichuan', name: '百川智能', url: 'https://www.baichuan-ai.com', selected: false }
+                    ]
+                };
+            },
+            mounted() {
+                this.loadSelection();
+            },
+            methods: {
+                loadSelection() {
+                    try {
+                        const stored = localStorage.getItem(this.STORAGE_KEY);
+                        if (stored) {
+                            const parsed = JSON.parse(stored);
+                            this.allProviders.forEach(p => {
+                                p.selected = parsed.includes(p.id);
+                            });
+                            return;
+                        }
+                    } catch (e) {
+                        console.error('读取配置失败', e);
+                    }
+                    // 默认选中前3个
+                    this.allProviders.slice(0, 3).forEach((provider) => {
+                        provider.selected = true;
+                    });
+                },
+
+                // 完全重写checkbox的选择逻辑
+                toggleProviderSelection() {
+                    const clickedId = event.target.value;
+                    const provider = this.allProviders.find(p => p.id === clickedId);
+                    
+                    if (!provider.selected) {
+                        // 尝试选中
+                        const selectedCount = this.allProviders.filter(p => p.selected).length;
+                        if (selectedCount >= 4) {
+                            // 已达到上限，阻止选中
+                            event.target.checked = false; // 手动重置UI状态
+                            return;
+                        }
+                        // 合法操作，允许选中
+                        provider.selected = true;
+                    } else {
+                        // 尝试取消选中
+                        const selectedCount = this.allProviders.filter(p => p.selected).length;
+                        if (selectedCount <= 1) {
+                            // 至少要有一个被选中，不允许取消
+                            event.target.checked = true; // 手动重置UI状态
+                            return;
+                        }
+                        // 合法操作，允许取消
+                        provider.selected = false;
+                    }
+                    
+                    // 将当前选中的 ID 保存到 localStorage
+                    const selectedIds = this.allProviders.filter(p => p.selected).map(p => p.id);
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(selectedIds));
+                },
+
+                postMessageToAll(type, content) {
+                    const activeProviders = this.allProviders.filter(p => p.selected);
+                    activeProviders.forEach(provider => {
+                        const iframeRef = this.$refs['iframe-' + provider.id];
+                        const iframeEl = Array.isArray(iframeRef) ? iframeRef[0] : iframeRef;
+                        
+                        if (iframeEl && iframeEl.contentWindow) {
+                            iframeEl.contentWindow.postMessage({ type: type, value: content }, '*');
+                        }
+                    });
+                },
+
+                sendMessage() {
+                    const text = this.messageInput.trim();
+                    if (!text) return;
+
+                    this.postMessageToAll('SET_TEXT', text);
+                    this.messageInput = '';
+                },
+
+                startNewChat() {
+                    this.postMessageToAll('NEW_CHAT', '');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
