@@ -1,17 +1,17 @@
 // ==UserScript==
-// @name         ai-chat-compare-message-listener
+// @name         ai-chat-compare
 // @namespace    http://tampermonkey.net/
 // @version      2026-01-23
-// @description  try to take over the world!
-// @author       You
+// @description  add message listener to page
+// @author       wzshuang
 // @match        https://chat.deepseek.com/*
 // @match        https://aistudio.xiaomimimo.com/*
 // @match        https://chat.qwen.ai/*
 // @match        https://chat.z.ai/*
 // @match        https://www.doubao.com/chat/*
 // @match        https://chatgpt.com/*
+// @match        https://yiyan.baidu.com/*
 // @match        https://aistudio.google.com/prompts/new_chat/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=deepseek.com
 // @grant        none
 // ==/UserScript==
 
@@ -129,8 +129,6 @@
                     clickElement(config.newChatFindFn());
                 }
             });
-
-            console.log('[Tampermonkey] postMessage 监听器已注入到页面上下文');
         })();
     `;
 

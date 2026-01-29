@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI对话聚合对比</title>
-    <script src="https://unpkg.com/vue@2.7.16/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue@2.7.16/dist/vue.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -149,7 +149,6 @@
             padding: 10px;
             border: 0;
             font-size: 14px;
-            resize: none; /* 禁止手动拖拽，防止破坏布局 */
             outline: none;
             font-family: inherit;
         }
@@ -303,14 +302,14 @@
                     messageInput: '',
                     // AI模型配置
                     allProviders: [
-                        { id: 'deepseek', name: 'DeepSeek', url: 'https://chat.deepseek.com', selected: false },
-                        { id: 'chatglm', name: '智谱清言', url: 'https://chat.z.ai', selected: false },
-                        { id: 'qwen', name: '通义千问', url: 'https://chat.qwen.ai', selected: false },
-                        { id: 'kimi', name: 'Kimi', url: 'https://kimi.moonshot.cn', selected: false },
+                        { id: 'deepseek', name: 'DeepSeek', url: 'https://chat.deepseek.com', selected: true },
+                        { id: 'chatglm', name: '智谱清言', url: 'https://chat.z.ai', selected: true },
+                        { id: 'qwen', name: '通义千问', url: 'https://chat.qwen.ai', selected: true },
+                        { id: 'xiaomimimo', name: '小米MiMo', url: 'https://aistudio.xiaomimimo.com', selected: false },
                         { id: 'doubao', name: '豆包', url: 'https://www.doubao.com', selected: false },
                         { id: 'yiyan', name: '文心一言', url: 'https://yiyan.baidu.com', selected: false },
-                        { id: 'spark', name: 'ChatGPT', url: 'https://chatgpt.com', selected: false },
-                        { id: 'baichuan', name: 'Gemini', url: 'https://aistudio.google.com/prompts/new_chat', selected: false }
+                        { id: 'chatgpt', name: 'ChatGPT', url: 'https://chatgpt.com', selected: false },
+                        { id: 'gemini', name: 'Gemini', url: 'https://aistudio.google.com/prompts/new_chat', selected: false }
                     ]
                 };
             },
@@ -318,6 +317,7 @@
                 this.loadSelection();
             },
             methods: {
+                // 从本地缓存中加载配置
                 loadSelection() {
                     try {
                         const stored = localStorage.getItem(this.STORAGE_KEY);
@@ -331,13 +331,9 @@
                     } catch (e) {
                         console.error('读取配置失败', e);
                     }
-                    // 默认选中前3个
-                    this.allProviders.slice(0, 3).forEach((provider) => {
-                        provider.selected = true;
-                    });
                 },
 
-                // 完全重写checkbox的选择逻辑
+                // 完全重写checkbox的选择逻辑。不超过4个时可以选中，超过4个时无法再选中
                 toggleProviderSelection() {
                     const clickedId = event.target.value;
                     const provider = this.allProviders.find(p => p.id === clickedId);
@@ -369,6 +365,7 @@
                     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(selectedIds));
                 },
 
+                // 向所有选中的模型iframe发送消息
                 postMessageToAll(type, content) {
                     const activeProviders = this.allProviders.filter(p => p.selected);
                     activeProviders.forEach(provider => {
@@ -381,6 +378,7 @@
                     });
                 },
 
+                // 发送消息按钮点击事件
                 sendMessage() {
                     const text = this.messageInput.trim();
                     if (!text) return;
@@ -389,6 +387,7 @@
                     this.messageInput = '';
                 },
 
+                // 新会话按钮点击事件
                 startNewChat() {
                     this.postMessageToAll('NEW_CHAT', '');
                 }

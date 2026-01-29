@@ -1,0 +1,30 @@
+{
+	"request": [],
+	"sendHeader": [],
+	"receiveHeader": [
+		{
+			"enable": true,
+			"group": "未分组",
+			"ruleType": "modifyReceiveHeader",
+			"isFunction": true,
+			"forceRunner": "auto",
+			"code": "for (const a in val) {\n\tif (val[a].name.toLowerCase() === 'set-cookie') {\n        const cookieStr = val[a].value;\n        if (cookieStr.includes('SameSite=')) {\n            // 替换现有的SameSite值\n            val[a].value = cookieStr.replace(/SameSite=[^;\\s]*/i, 'SameSite=None; Secure;');\n        } else {\n          val[a].value = cookieStr + '; SameSite=None; Secure;';\n        }\n\t}\n    if (val[a].name.toLowerCase() === 'content-security-policy') {\n        val[a].value = \"INVALID_VALUE\";\n    }\n    if (val[a].name.toLowerCase() === 'content-security-policy-report-only') {\n        val[a].value = \"INVALID_VALUE\";\n    }\n    if (val[a].name.toLowerCase() === 'x-frame-options') {\n        val[a].value = \"INVALID_VALUE\";\n    }\n}",
+			"name": "ai-chat-compare",
+			"headers": {},
+			"condition": {
+				"all": true,
+				"domain": [
+					"chat.z.ai",
+					"chat.deepseek.com",
+					"aistudio.xiaomimimo.com",
+					"chat.qwen.ai",
+					"www.doubao.com",
+					"aistudio.google.com",
+					"chatgpt.com"
+				]
+			},
+			"encoding": "utf-8"
+		}
+	],
+	"receiveBody": []
+}

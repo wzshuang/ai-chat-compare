@@ -4,6 +4,10 @@
 
 AI Chat Compare 是一个强大的 AI 对话聚合对比工具，允许用户同时向多个 AI 模型发送相同的消息，并实时比较它们的回复。通过这个工具，用户可以更直观地评估不同 AI 模型的表现，选择最适合自己需求的 AI 助手。
 
+## 在线体验
+
+[https://wzshuang.github.io/ai-chat-compare](https://wzshuang.github.io/ai-chat-compare)
+
 ## 功能特性
 
 - **多模型并行对比**：同时选择 1-4 个 AI 模型进行实时对话对比
@@ -16,62 +20,67 @@ AI Chat Compare 是一个强大的 AI 对话聚合对比工具，允许用户同
 
 ## 功能预览
 
+### 功能演示
+
+![功能演示](screenshots/main.gif)
+
 ### 主界面预览
 
-![主界面预览](screenshots/main-interface.png)
+![主界面预览1](screenshots/main-interface.png)
+
+### 插件配置
+
+![篡改猴截图1](screenshots/ScreenShot_2026-01-26_110303_251.png)
+
+![篡改猴截图2](screenshots/ScreenShot_2026-01-26_105754_090.png)
+
+![篡改猴截图3](screenshots/ScreenShot_2026-01-26_110059_502.png)
+
+![head-editor截图1](screenshots/ScreenShot_2026-01-26_110455_636.png)
+
+![head-editor截图2](screenshots/ScreenShot_2026-01-26_110610_844.png)
+
+![head-editor截图3](screenshots/ScreenShot_2026-01-26_110656_161.png)
+
+![head-editor截图4](screenshots/ScreenShot_2026-01-26_110753_883.png)
 
 ## 支持的 AI 模型
 
-- DeepSeek
-- 智谱清言
-- 通义千问
-- Kimi
-- 豆包
-- 文心一言
-- ChatGPT
-- Gemini
+- [x] DeepSeek
+- [x] 智谱清言
+- [x] 通义千问
+- [x] 小米MiMo
+- [x] 豆包
+- [x] 文心一言
+- [ ] ChatGPT
+- [ ] Gemini
 
-## 安装与设置
+## 安装与使用
 
-### 方法一：直接使用（推荐）
+### 浏览器扩展安装与配置
+1. 安装浏览器扩展：
+   - `Tampermonkey` 用于注入消息监听器
+   - `Header Editor` 用于修改HTTP头，解决跨域和iframe嵌入问题
 
-1. 克隆或下载本项目到本地
-2. 安装浏览器扩展：
-   - [Tampermonkey](https://www.tampermonkey.net/)（用于注入消息监听器）
-   - [Header Editor](https://github.com/FirefoxBar/HeaderEditor)（用于修改HTTP头，解决跨域和iframe嵌入问题）
-
-3. 配置 Tampermonkey 脚本：
+2. 配置 Tampermonkey 脚本：
    - 打开 Tampermonkey 扩展
-   - 点击「创建新脚本」
-   - 复制 `message-listener.js` 文件的内容到编辑器中
-   - 保存脚本
+   - 点击「实用工具」
+   - 点击导入，选择 `message-listener.js` 文件
+   - 保存
 
-4. 配置 Header Editor 规则：
+3. 配置 Header Editor 规则：
    - 打开 Header Editor 扩展
-   - 点击「添加规则」
-   - 填写以下信息：
-     - 名称：AI Chat Compare 头修改
-     - 规则类型：修改响应头
-     - 匹配类型：所有URL
-     - 正则表达式：`.*`
-     - 操作：运行脚本
-     - 脚本：复制 `modify-header.js` 文件的内容
-   - 保存规则
+   - 点击「导入和导出」
+   - 点击导入，选择 `head-editor.json` 文件
+   - 保存
 
-### 方法二：本地服务器运行
+### 访问页面
 
-如果直接打开 HTML 文件遇到跨域问题，可以使用本地服务器运行：
+在浏览器中打开 [https://wzshuang.github.io/ai-chat-compare](https://wzshuang.github.io/ai-chat-compare)
 
-```bash
-# 使用 Python 3
-python -m http.server 8000
+或者  
 
-# 或使用 Node.js (需要安装 http-server)
-npm install -g http-server
-http-server -p 8000
-```
-
-然后在浏览器中访问 `http://localhost:8000`
+克隆或下载项目到本地，然后在浏览器中打开 `index.html` 文件。
 
 ## 使用说明
 
@@ -92,11 +101,10 @@ http-server -p 8000
 
 ## 注意事项
 
-1. **登录状态**：首次使用时，需要在每个 iframe 中单独登录对应的 AI 服务账号
-2. **浏览器兼容性**：推荐使用 Chrome、Edge 等现代浏览器
-3. **性能考虑**：同时开启多个 AI 模型可能会增加浏览器内存占用
-4. **API 限制**：部分 AI 服务可能有使用频率限制，请合理使用
-5. **隐私保护**：所有消息处理均在本地完成，不会上传到第三方服务器
+1. **浏览器兼容性**：推荐使用 Chrome、Edge 等现代浏览器
+2. **性能考虑**：同时开启多个 AI 模型可能会增加浏览器内存占用
+3. **API 限制**：部分 AI 服务可能有使用频率限制，请合理使用
+4. **隐私保护**：所有消息处理均在本地完成，不会上传到第三方服务器
 
 ## 项目结构
 
