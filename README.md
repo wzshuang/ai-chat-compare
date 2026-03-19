@@ -17,6 +17,8 @@ AI Chat Compare 是一个强大的 AI 对话聚合对比工具，允许用户同
 - **响应式设计**：支持桌面端和移动端使用
 - **本地存储**：自动保存用户的模型选择偏好
 - **快捷键支持**：按 `Ctrl + Enter` 快速发送消息
+- **完全免费**：无需Token即可使用
+- **无需下载**: 配置好浏览器插件后，直接在浏览器中打开即可使用
 
 ## 功能预览
 
@@ -47,10 +49,12 @@ AI Chat Compare 是一个强大的 AI 对话聚合对比工具，允许用户同
 ## 支持的 AI 模型
 
 - [x] DeepSeek
-- [x] 智谱清言
 - [x] 通义千问
-- [x] 小米MiMo
+- [x] 智谱清言
 - [x] 豆包
+- [x] 小米MiMo
+- [x] Kimi
+- [x] MiniMax
 - [x] 文心一言
 - [ ] ChatGPT
 - [ ] Gemini
@@ -65,14 +69,15 @@ AI Chat Compare 是一个强大的 AI 对话聚合对比工具，允许用户同
 2. 配置 Tampermonkey 脚本：
    - 打开 Tampermonkey 扩展
    - 点击「实用工具」
-   - 点击导入，选择 `message-listener.js` 文件
-   - 保存
+   - 如果想从本地文件导入，请选择项目中的 `message-listener.js` 文件
+   - 如果想使用url安装，请输入`https://wzshuang.github.io/ai-chat-compare/message-listener-v20260203.js`
 
 3. 配置 Header Editor 规则：
    - 打开 Header Editor 扩展
    - 点击「导入和导出」
-   - 点击导入，选择 `head-editor.json` 文件
-   - 保存
+   - 如果想从本地文件导入，请选择项目中的 `head-editor.json` 文件
+   - 如果想使用url下载，请在下载规则里输入`https://wzshuang.github.io/ai-chat-compare/head-editor-v20260203.json`
+   - 点击保存
 
 ### 访问页面
 
@@ -112,10 +117,25 @@ AI Chat Compare 是一个强大的 AI 对话聚合对比工具，允许用户同
 ai-chat-compare/
 ├── index.html          # 主页面文件
 ├── message-listener.js # Tampermonkey 脚本
-├── modify-header.js    # Header Editor 脚本
+├── header-editor.json  # Header Editor 配置文件
 ├── README.md           # 项目说明文件
 └── LICENSE             # 许可证文件
 ```
+
+## 常见问题
+
+### 登录状态丢失
+
+一般情况下，在聚合页面重新登录一遍即可保持登录状态。  
+如果登录后，再刷新页面，又变成未登录状态，请检查head-editor的配置，是否包含当前ai的域名。
+
+### 用户数据是否安全？
+
+本项目所有代码均开源，不会搜集任何用户数据。
+
+### 我想用的AI不在列表里
+
+欢迎在issue中反馈，收到需求后会尽快适配。
 
 ## 许可证
 
